@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Axios instance
 const API = axios.create({
-    baseURL: 'http://localhost:5000/api', // Replace with your backend URL
+    baseURL: process.env.REACT_APP_API_BASE_URL,
 });
 
 // Fetch all bills
