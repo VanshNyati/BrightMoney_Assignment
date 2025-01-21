@@ -13,12 +13,10 @@ connectDB();
 const app = express();
 
 app.use(cors({
-    origin: 'https://brightmoney-assignment.onrender.com/', 
+    origin: 'https://brightmoney-assignment.onrender.com', 
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
 }));
-
-
 // Routes
 app.use('/api/bills', billRoutes);
 
