@@ -13,20 +13,14 @@ connectDB();
 const app = express();
 
 // Middleware
-const allowedOrigins = ['http://localhost:3000', 'http://localhost:3001', 'http://127.0.0.1']; // Add all allowed origins
+const cors = require('cors');
 
 app.use(cors({
-    origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true); // Allow the origin
-        } else {
-            callback(new Error('Not allowed by CORS')); // Reject the request
-        }
-    },
-    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allow specific HTTP methods
-    credentials: true, // Allow cookies if needed
+    origin: 'https://brightmoney-assignment.onrender.com/', 
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true,
 }));
-app.use(express.json());
+
 
 // Routes
 app.use('/api/bills', billRoutes);
