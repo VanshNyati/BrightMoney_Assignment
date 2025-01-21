@@ -12,9 +12,6 @@ connectDB();
 
 const app = express();
 
-// Middleware
-const cors = require('cors');
-
 app.use(cors({
     origin: 'https://brightmoney-assignment.onrender.com/', 
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
