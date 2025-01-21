@@ -10,7 +10,10 @@ const BillFormModal = ({ isOpen, onClose, onSubmit, currentBill }) => {
 
     useEffect(() => {
         if (currentBill) {
-            setBill(currentBill);
+            setBill({
+                ...currentBill,
+                date: new Date(currentBill.date).toISOString().split('T')[0], // Format date as YYYY-MM-DD
+            });
         } else {
             setBill({ description: '', category: '', amount: '', date: '' });
         }

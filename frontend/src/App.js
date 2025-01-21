@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import Navbar from './components/Navbar';
 import BillsTable from './components/BillsTable';
 import BillFormModal from './components/BillFormModal';
+import TimeSeriesChart from './components/TimeSeriesChart';
 import { getBills, createBill, editBill, removeBill } from './redux/BillsSlice';
 
 const App = () => {
@@ -11,13 +12,13 @@ const App = () => {
 
   const [isModalOpen, setModalOpen] = useState(false);
   const [currentBill, setCurrentBill] = useState(null);
+  const [filterCategory, setFilterCategory] = useState('');
+  const [sortOption, setSortOption] = useState('');
 
-  // Fetch bills on initial load
   useEffect(() => {
     dispatch(getBills());
   }, [dispatch]);
 
-  // Open modal to add or edit bills
   const handleAddClick = () => {
     setCurrentBill(null);
     setModalOpen(true);
@@ -28,43 +29,62 @@ const App = () => {
     setModalOpen(true);
   };
 
-  // Close the modal
   const handleCloseModal = () => {
     setModalOpen(false);
     setCurrentBill(null);
   };
 
-  // Handle form submission
   const handleFormSubmit = (bill) => {
     if (bill._id) {
-      // Edit existing bill
       dispatch(editBill({ id: bill._id, bill }));
     } else {
-      // Add new bill
       dispatch(createBill(bill));
     }
   };
 
-  // Handle bill deletion
   const handleDeleteClick = (id) => {
-    dispatch(removeBill(id));
+    const isConfirmed = window.confirm('Are you sure you want to delete this item?');
+    if (isConfirmed) {
+      dispatch(removeBill(id));
+    }
   };
+
+  // Filter and sort bills
+  const filteredBills = bills
+    .filter((bill) => (filterCategory ? bill.category === filterCategory : true))
+    .sort((a, b) => {
+      if (!sortOption) return 0;
+      const [key, order] = sortOption.split('-');
+      const valueA = key === 'date' ? new Date(a[key]) : a[key];
+      const valueB = key === 'date' ? new Date(b[key]) : b[key];
+      return order === 'asc' ? valueA - valueB : valueB - valueA;
+    });
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Navbar */}
-      <Navbar onFilterClick={() => alert('Filter functionality to be added!')} onAddClick={handleAddClick} />
+      <Navbar
+        filterCategory={filterCategory}
+        setFilterCategory={setFilterCategory}
+        sortOption={sortOption}
+        setSortOption={setSortOption}
+        onAddClick={handleAddClick}
+      />
 
-      {/* Hero Section */}
+      <div className="container mx-auto px-4 py-4">
+        <h3 className="text-lg font-bold">Total Spent: ₹{filteredBills.reduce((total, bill) => total + bill.amount, 0)}</h3>
+      </div>
+
       <div className="container mx-auto px-4 py-6">
         {loading && <p>Loading bills...</p>}
         {error && <p className="text-red-500">Error: {error}</p>}
         {!loading && !error && (
-          <BillsTable bills={bills} onEdit={handleEditClick} onDelete={handleDeleteClick} />
+          <>
+            <BillsTable bills={filteredBills} onEdit={handleEditClick} onDelete={handleDeleteClick} />
+            <TimeSeriesChart bills={filteredBills} />
+          </>
         )}
       </div>
 
-      {/* Modal */}
       <BillFormModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
