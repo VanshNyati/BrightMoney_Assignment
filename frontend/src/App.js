@@ -1,50 +1,75 @@
 import React, { useState, useEffect } from 'react';
-import BillList from './components/BillList';
-import BillForm from './components/BillForm';
-import { fetchBills, addBill, updateBill, deleteBill } from './services/Api'; 
+import { useDispatch, useSelector } from 'react-redux';
+import Navbar from './components/Navbar';
+import BillsTable from './components/BillsTable';
+import BillFormModal from './components/BillFormModal';
+import { getBills, createBill, editBill, removeBill } from './redux/BillsSlice';
 
 const App = () => {
-  const [bills, setBills] = useState([]);
+  const dispatch = useDispatch();
+  const { bills, loading, error } = useSelector((state) => state.bills);
+
+  const [isModalOpen, setModalOpen] = useState(false);
   const [currentBill, setCurrentBill] = useState(null);
 
-  const loadBills = async () => {
-    const response = await fetchBills();
-    setBills(response.data);
+  // Fetch bills on initial load
+  useEffect(() => {
+    dispatch(getBills());
+  }, [dispatch]);
+
+  // Open modal to add or edit bills
+  const handleAddClick = () => {
+    setCurrentBill(null);
+    setModalOpen(true);
   };
 
-  const handleAddOrUpdate = async (bill) => {
+  const handleEditClick = (bill) => {
+    setCurrentBill(bill);
+    setModalOpen(true);
+  };
+
+  // Close the modal
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setCurrentBill(null);
+  };
+
+  // Handle form submission
+  const handleFormSubmit = (bill) => {
     if (bill._id) {
-      const response = await updateBill(bill._id, bill);
-      setBills(
-        bills.map((b) => (b._id === bill._id ? response.data : b))
-      );
+      // Edit existing bill
+      dispatch(editBill({ id: bill._id, bill }));
     } else {
-      const response = await addBill(bill);
-      setBills([...bills, response.data]);
+      // Add new bill
+      dispatch(createBill(bill));
     }
   };
 
-  const handleDelete = async (id) => {
-    await deleteBill(id);
-    setBills(bills.filter((b) => b._id !== id));
+  // Handle bill deletion
+  const handleDeleteClick = (id) => {
+    dispatch(removeBill(id));
   };
 
-  useEffect(() => {
-    loadBills();
-  }, []);
-
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
-      <h1 className="text-2xl font-bold text-center mb-6">Bill Management</h1>
-      <BillForm
-        onSubmit={handleAddOrUpdate}
+    <div className="min-h-screen bg-gray-100">
+      {/* Navbar */}
+      <Navbar onFilterClick={() => alert('Filter functionality to be added!')} onAddClick={handleAddClick} />
+
+      {/* Hero Section */}
+      <div className="container mx-auto px-4 py-6">
+        {loading && <p>Loading bills...</p>}
+        {error && <p className="text-red-500">Error: {error}</p>}
+        {!loading && !error && (
+          <BillsTable bills={bills} onEdit={handleEditClick} onDelete={handleDeleteClick} />
+        )}
+      </div>
+
+      {/* Modal */}
+      <BillFormModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSubmit={handleFormSubmit}
         currentBill={currentBill}
-        setCurrentBill={setCurrentBill}
-      />
-      <BillList
-        bills={bills}
-        onEdit={setCurrentBill}
-        onDelete={handleDelete}
       />
     </div>
   );

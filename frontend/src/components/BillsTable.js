@@ -1,10 +1,9 @@
 import React from 'react';
 
-const BillList = ({ bills, onEdit, onDelete }) => {
+const BillsTable = ({ bills, onEdit, onDelete }) => {
     return (
-        <div className="bg-white shadow rounded-lg p-4">
-            <h2 className="text-xl font-bold mb-4">Bills</h2>
-            <table className="w-full table-auto border-collapse">
+        <div className="overflow-x-auto mt-4">
+            <table className="min-w-full bg-white border border-gray-300">
                 <thead>
                     <tr className="bg-gray-100">
                         <th className="border px-4 py-2 text-left">Description</th>
@@ -43,4 +42,4 @@ const BillList = ({ bills, onEdit, onDelete }) => {
     );
 };
 
-export default BillList;
+export default BillsTable;
